@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Next month's budget</title>
+    <meta
+      name="description"
+      content="A practice tool that estimates what you will spend next month. Your answers, saved under a code name, help train a better model."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --page: #e8eee6;
+        --ink: #17261d;
+        --muted: #4f5f53;
+        --line: #bcc9bb;
+        --field: #f7faf5;
+        --green: #1e6a47;
+        --green-dark: #164f35;
+        --slip: #fcfbf4;
+        --mark: #f2d24b;
+        --error: #a3361f;
+        --sans:
+          "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto,
+          sans-serif;
+        --mono:
+          "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
+          monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 1.0625rem;
+        line-height: 1.5;
+      }
+      main {
+        max-width: 36rem;
+        margin: 0 auto;
+        padding: 2.5rem 1rem 5rem;
+      }
+
+      h1 {
+        font-size: clamp(2.1rem, 8vw, 3rem);
+        line-height: 1.05;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 0 0 1rem;
+        text-wrap: balance;
+      }
+      .lede {
+        color: var(--muted);
+        margin: 0 0 2.25rem;
+        max-width: 34rem;
+      }
+
+      fieldset {
+        border: 0;
+        padding: 0;
+        margin: 0 0 2.25rem;
+        min-width: 0;
+      }
+      legend {
+        font-weight: 600;
+        font-size: 1.25rem;
+        padding: 0 0 0.75rem;
+        margin: 0;
+        width: 100%;
+        border-bottom: 2px solid var(--ink);
+        margin-bottom: 1.25rem;
+      }
+      .field {
+        margin-bottom: 1.25rem;
+      }
+      label,
+      .label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 0.9375rem;
+        margin: 0 0 0.5rem;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        font: inherit;
+        padding: 0.7rem 0.8rem;
+        color: var(--ink);
+        background: var(--field);
+        border: 1.5px solid var(--line);
+        border-radius: 6px;
+      }
+      input::placeholder {
+        color: #8a988c;
+      }
+      input:focus-visible,
+      button:focus-visible,
+      .chip input:focus-visible + span {
+        outline: 3px solid var(--green);
+        outline-offset: 2px;
+      }
+      input[aria-invalid="true"] {
+        border-color: var(--error);
+      }
+
+      .money {
+        position: relative;
+      }
+      .money::before {
+        content: "\20A6";
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        pointer-events: none;
+      }
+      .money input {
+        padding-left: 1.9rem;
+      }
+
+      .code-row {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .code-row input {
+        flex: 1;
+        font-family: var(--mono);
+        font-size: 1rem;
+      }
+      .link-btn {
+        font: inherit;
+        font-weight: 600;
+        color: var(--green-dark);
+        background: none;
+        border: 1.5px solid var(--line);
+        border-radius: 6px;
+        padding: 0 0.9rem;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .link-btn:hover {
+        border-color: var(--green);
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .chip {
+        position: relative;
+        margin: 0;
+        font-weight: 400;
+      }
+      .chip input {
+        position: absolute;
+        opacity: 0;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        cursor: pointer;
+      }
+      .chip span {
+        display: block;
+        padding: 0.6rem 1.1rem;
+        background: var(--field);
+        border: 1.5px solid var(--line);
+        border-radius: 999px;
+      }
+      .chip input:checked + span {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .month {
+        padding: 1rem 0;
+        border-top: 1px solid var(--line);
+      }
+      .month:first-of-type {
+        border-top: 0;
+        padding-top: 0;
+      }
+      .month-name {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .pair label {
+        font-weight: 400;
+        font-size: 0.9375rem;
+        color: var(--muted);
+      }
+
+      .consent {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        font-weight: 400;
+        margin: 0 0 1.5rem;
+      }
+      .consent input {
+        margin-top: 0.3rem;
+        width: 1.15rem;
+        height: 1.15rem;
+        accent-color: var(--green);
+        flex: none;
+      }
+
+      .submit {
+        font: inherit;
+        font-weight: 800;
+        font-size: 1.125rem;
+        width: 100%;
+        padding: 1rem 1.25rem;
+        color: #fff;
+        background: var(--green);
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .submit:hover {
+        background: var(--green-dark);
+      }
+      .submit[disabled] {
+        opacity: 0.6;
+        cursor: wait;
+      }
+
+      .error {
+        color: var(--error);
+        font-weight: 600;
+        margin: 0 0 1rem;
+        padding: 0.75rem 1rem;
+        border-left: 4px solid var(--error);
+        background: #f7e6e1;
+      }
+      .error[hidden] {
+        display: none;
+      }
+
+      .progress {
+        margin: -1.25rem 0 2.25rem;
+        font-weight: 600;
+        color: var(--green-dark);
+      }
+      .progress[hidden] {
+        display: none;
+      }
+
+      /* The estimate is printed like a till receipt: the one loud moment on the page. */
+      .result {
+        margin-top: 3rem;
+        scroll-margin-top: 1rem;
+      }
+      .result[hidden] {
+        display: none;
+      }
+      .slip {
+        position: relative;
+        background: var(--slip);
+        padding: 1.75rem 1.5rem 2rem;
+        font-family: var(--mono);
+        font-size: 0.9375rem;
+        box-shadow: 0 1px 0 rgba(23, 38, 29, 0.15);
+        animation: print 0.9s steps(14, end) both;
+      }
+      .slip::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -12px;
+        height: 12px;
+        background:
+          linear-gradient(135deg, var(--slip) 6px, transparent 0) 0 0 / 16px
+            12px repeat-x,
+          linear-gradient(225deg, var(--slip) 6px, transparent 0) 0 0 / 16px
+            12px repeat-x;
+      }
+      @keyframes print {
+        from {
+          clip-path: inset(0 0 100% 0);
+        }
+        to {
+          clip-path: inset(0 0 -14px 0);
+        }
+      }
+      .slip h2 {
+        font-family: var(--sans);
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+      }
+      .big {
+        font-family: var(--sans);
+        font-weight: 800;
+        font-size: clamp(2.6rem, 13vw, 3.75rem);
+        line-height: 1;
+        letter-spacing: -0.02em;
+        margin: 0.25rem 0 0.75rem;
+      }
+      .big span {
+        background: linear-gradient(transparent 62%, var(--mark) 62%);
+        padding: 0 0.15em;
+      }
+      .range {
+        margin: 0 0 1.25rem;
+      }
+      .dash {
+        border: 0;
+        border-top: 2px dashed #a9b5a8;
+        margin: 1rem 0;
+      }
+      .slip dl {
+        margin: 0;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.35rem 1rem;
+      }
+      .slip dt {
+        color: var(--muted);
+      }
+      .slip dd {
+        margin: 0;
+        text-align: right;
+        overflow-wrap: anywhere;
+      }
+      .fine {
+        font-family: var(--sans);
+        font-size: 0.9375rem;
+        color: var(--muted);
+        margin: 0;
+      }
+      .status {
+        font-family: var(--sans);
+        font-weight: 600;
+        margin: 1rem 0 0;
+      }
+      .status.bad {
+        color: var(--error);
+      }
+      .after {
+        margin-top: 2.5rem;
+        color: var(--muted);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .slip {
+          animation: none;
+        }
+      }
+      @media (max-width: 26rem) {
+        .pair {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>What will you spend next month?</h1>
+      <p class="lede">
+        Answer the questions below and get an estimate. This is a practice
+        model. Your answers, saved under a code name, help train a better one.
+      </p>
+      <p class="progress" id="progress" hidden></p>
+
+      <noscript
+        ><p class="error">
+          This page needs JavaScript to work out your estimate.
+        </p></noscript
+      >
+
+      <form id="budget-form" novalidate>
+        <fieldset>
+          <legend>Your code name</legend>
+          <div class="field">
+            <label for="codename">Code name</label>
+            <p class="hint" id="codename-hint">
+              Your answers are saved under this name. Do not use your real name,
+              phone number or email.
+            </p>
+            <div class="code-row">
+              <input
+                type="text"
+                id="codename"
+                name="codename"
+                maxlength="24"
+                autocomplete="off"
+                spellcheck="false"
+                aria-describedby="codename-hint"
+                required
+              />
+              <button type="button" class="link-btn" id="new-code">
+                New code name
+              </button>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>About you</legend>
+
+          <div class="field">
+            <label for="age">Age</label>
+            <input
+              type="number"
+              id="age"
+              name="age"
+              min="18"
+              max="70"
+              inputmode="numeric"
+              placeholder="e.g. 29"
+              required
+            />
+          </div>
+
+          <div class="field" role="radiogroup" aria-labelledby="emp-label">
+            <span class="label" id="emp-label">Work</span>
+            <div class="chips">
+              <label class="chip"
+                ><input
+                  type="radio"
+                  name="employment_status"
+                  value="working"
+                  required
+                /><span>Working</span></label
+              >
+              <label class="chip"
+                ><input
+                  type="radio"
+                  name="employment_status"
+                  value="unemployed"
+                /><span>Unemployed</span></label
+              >
+            </div>
+          </div>
+
+          <div class="field" role="radiogroup" aria-labelledby="rel-label">
+            <span class="label" id="rel-label">Relationship</span>
+            <div class="chips">
+              <label class="chip"
+                ><input
+                  type="radio"
+                  name="relationship_status"
+                  value="single"
+                  required
+                /><span>Single</span></label
+              >
+              <label class="chip"
+                ><input
+                  type="radio"
+                  name="relationship_status"
+                  value="dating"
+                /><span>Dating</span></label
+              >
+              <label class="chip"
+                ><input
+                  type="radio"
+                  name="relationship_status"
+                  value="married"
+                /><span>Married</span></label
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="monthly_income">Monthly income</label>
+            <p class="hint">
+              What you receive in a normal month, from work or anywhere else.
+              Enter 0 if nothing.
+            </p>
+            <div class="money">
+              <input
+                type="text"
+                id="monthly_income"
+                name="monthly_income"
+                inputmode="numeric"
+                placeholder="150,000"
+                required
+              />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Your last three months</legend>
+          <p class="hint">
+            Fill in as many months as you can remember, starting with last
+            month. Rough figures are fine. Only last month is required.
+          </p>
+
+          <div class="month">
+            <div class="month-name">Last month</div>
+            <div class="pair">
+              <div>
+                <label for="m1_spending">Total spent</label>
+                <div class="money">
+                  <input
+                    type="text"
+                    id="m1_spending"
+                    name="m1_spending"
+                    inputmode="numeric"
+                    placeholder="150,000"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label for="m1_emergency">Of that, emergencies</label>
+                <div class="money">
+                  <input
+                    type="text"
+                    id="m1_emergency"
+                    name="m1_emergency"
+                    inputmode="numeric"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </div>
+            <p class="hint" style="margin-top: 0.5rem">
+              An emergency is anything unplanned, like a hospital bill or a
+              repair. Leave blank if none.
+            </p>
+          </div>
+
+          <div class="month">
+            <div class="month-name">Two months ago</div>
+            <div class="pair">
+              <div>
+                <label for="m2_spending">Total spent</label>
+                <div class="money">
+                  <input
+                    type="text"
+                    id="m2_spending"
+                    name="m2_spending"
+                    inputmode="numeric"
+                    placeholder="optional"
+                  />
+                </div>
+              </div>
+              <div>
+                <label for="m2_emergency">Of that, emergencies</label>
+                <div class="money">
+                  <input
+                    type="text"
+                    id="m2_emergency"
+                    name="m2_emergency"
+                    inputmode="numeric"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="month">
+            <div class="month-name">Three months ago</div>
+            <div class="pair">
+              <div>
+                <label for="m3_spending">Total spent</label>
+                <div class="money">
+                  <input
+                    type="text"
+                    id="m3_spending"
+                    name="m3_spending"
+                    inputmode="numeric"
+                    placeholder="optional"
+                  />
+                </div>
+              </div>
+              <div>
+                <label for="m3_emergency">Of that, emergencies</label>
+                <div class="money">
+                  <input
+                    type="text"
+                    id="m3_emergency"
+                    name="m3_emergency"
+                    inputmode="numeric"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <label class="consent" for="consent">
+          <input
+            type="checkbox"
+            id="consent"
+            name="consent"
+            value="yes"
+            required
+          />
+          <span
+            >I understand this is a practice model and its estimate is not
+            financial advice. My answers, stored under my code name, will be
+            used to train it.</span
+          >
+        </label>
+
+        <p class="error" id="error" role="alert" hidden></p>
+        <button type="submit" class="submit" id="submit">
+          Get my estimate
+        </button>
+      </form>
+
+      <section class="result" id="result" hidden aria-live="polite">
+        <div class="slip">
+          <h2>Estimate for next month</h2>
+          <p class="big"><span id="r-estimate"></span></p>
+          <p class="range" id="r-range"></p>
+          <hr class="dash" />
+          <dl>
+            <dt>Code name</dt>
+            <dd id="r-code"></dd>
+            <dt>Spent last month</dt>
+            <dd id="r-last"></dd>
+            <dt>Usual miss</dt>
+            <dd id="r-mae"></dd>
+          </dl>
+          <hr class="dash" />
+          <p class="fine" id="r-note">
+            This model learned from generated practice data, so treat the number
+            as a guide.
+          </p>
+          <p class="status" id="r-status"></p>
+        </div>
+        <p class="after">
+          Thank you for helping train this model. Share the link with a friend,
+          since more people means a better model.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+
+        /* How this page talks to the back end
+     -----------------------------------
+     API is the address of the back end. Empty ("") means "the same server that sent me this page",
+     which is the normal case. To test the page from another tool (for example VS Code Live Server),
+     open it with  ?api=http://127.0.0.1:8000  at the end of the address.
+     The page never calculates an estimate itself. It sends the answers to the API and shows the reply. */
+        var API = new URLSearchParams(location.search).get("api") || "";
+
+        var $ = function (id) {
+          return document.getElementById(id);
+        };
+        var form = $("budget-form");
+        var saved = false; // true after the first successful save, so repeat clicks do not save twice
+
+        /* ---------- code names ---------- */
+        var adjectives = [
+          "Swift",
+          "Calm",
+          "Bright",
+          "Bold",
+          "Quiet",
+          "Lucky",
+          "Sunny",
+          "Brave",
+          "Clever",
+          "Gentle",
+          "Steady",
+          "Merry",
+        ];
+        var things = [
+          "Heron",
+          "Kite",
+          "Mango",
+          "Cedar",
+          "Falcon",
+          "Pepper",
+          "Gecko",
+          "Baobab",
+          "Egret",
+          "Drum",
+          "Palm",
+          "Cowrie",
+        ];
+        function pick(a) {
+          return a[Math.floor(Math.random() * a.length)];
+        }
+        function newCode() {
+          return (
+            pick(adjectives) +
+            pick(things) +
+            (100 + Math.floor(Math.random() * 900))
+          );
+        }
+        $("codename").value = newCode();
+        $("new-code").addEventListener("click", function () {
+          $("codename").value = newCode();
+        });
+
+        /* ---------- money inputs ---------- */
+        function digits(s) {
+          return (s || "").replace(/[^0-9]/g, "");
+        }
+        function fmt(n) {
+          return Number(n).toLocaleString("en-NG", {
+            maximumFractionDigits: 0,
+          });
+        }
+        var moneyIds = ["monthly_income"];
+        for (var i = 1; i <= 3; i++) {
+          moneyIds.push("m" + i + "_spending", "m" + i + "_emergency");
+        }
+        moneyIds.forEach(function (id) {
+          var el = $(id);
+          el.addEventListener("focus", function () {
+            el.value = digits(el.value);
+          });
+          el.addEventListener("input", function () {
+            el.value = digits(el.value);
+          });
+          el.addEventListener("blur", function () {
+            var d = digits(el.value);
+            el.value = d === "" ? "" : fmt(d);
+          });
+        });
+        function money(id) {
+          var d = digits($(id).value);
+          return d === "" ? null : Number(d);
+        }
+
+        /* ---------- checking the answers before sending (the server checks again) ---------- */
+        function fail(msg, el) {
+          var box = $("error");
+          box.textContent = msg;
+          box.hidden = false;
+          if (el) {
+            el.setAttribute("aria-invalid", "true");
+            el.focus();
+          }
+          return null;
+        }
+        function clearErrors() {
+          $("error").hidden = true;
+          Array.prototype.forEach.call(
+            form.querySelectorAll("[aria-invalid]"),
+            function (e) {
+              e.removeAttribute("aria-invalid");
+            },
+          );
+        }
+
+        function read() {
+          var code = $("codename").value.trim();
+          if (code.length < 3)
+            return fail(
+              "Enter a code name of at least 3 characters.",
+              $("codename"),
+            );
+          if (!/^[A-Za-z0-9_-]+$/.test(code) || /\d{7,}/.test(code))
+            return fail(
+              "Use only letters and numbers in your code name, and no phone numbers or emails.",
+              $("codename"),
+            );
+
+          var age = Number($("age").value);
+          if (!$("age").value || age < 18 || age > 70)
+            return fail("Enter an age between 18 and 70.", $("age"));
+
+          var emp = form.querySelector("input[name=employment_status]:checked");
+          if (!emp)
+            return fail(
+              "Choose whether you are working or unemployed.",
+              form.querySelector("input[name=employment_status]"),
+            );
+          var rel = form.querySelector(
+            "input[name=relationship_status]:checked",
+          );
+          if (!rel)
+            return fail(
+              "Choose your relationship status.",
+              form.querySelector("input[name=relationship_status]"),
+            );
+
+          var income = money("monthly_income");
+          if (income === null)
+            return fail(
+              "Enter your monthly income. Use 0 if you had none.",
+              $("monthly_income"),
+            );
+
+          var months = [];
+          var labels = ["last month", "two months ago", "three months ago"];
+          for (var i = 1; i <= 3; i++) {
+            var s = money("m" + i + "_spending");
+            var e = money("m" + i + "_emergency");
+            if (i === 1 && s === null)
+              return fail("Enter what you spent last month.", $("m1_spending"));
+            if (s === null && e !== null && e > 0)
+              return fail(
+                "You entered an emergency for " +
+                  labels[i - 1] +
+                  " but no total spent.",
+                $("m" + i + "_spending"),
+              );
+            if (s !== null && e !== null && e > s)
+              return fail(
+                "The emergency for " +
+                  labels[i - 1] +
+                  " is more than the total spent. Check both figures.",
+                $("m" + i + "_emergency"),
+              );
+            months.push({ spent: s, emergency: e === null ? 0 : e });
+          }
+
+          if (!$("consent").checked)
+            return fail(
+              "Tick the box to confirm you understand how your answers are used.",
+              $("consent"),
+            );
+
+          return {
+            code: code,
+            age: age,
+            employment: emp.value,
+            relationship: rel.value,
+            income: income,
+            m: months,
+          };
+        }
+
+        /* ---------- talking to the API ---------- */
+        // The names on the left are exactly the boxes of the Person / Submission classes in main.py.
+        function payloadOf(p, withSave) {
+          var body = {
+            age: p.age,
+            employment_status: p.employment,
+            relationship_status: p.relationship,
+            monthly_income: p.income,
+            last_month_spending: p.m[0].spent,
+            last_month_emergency: p.m[0].emergency,
+          };
+          if (withSave) {
+            body.codename = p.code;
+            body.m2_spending = p.m[1].spent;
+            body.m2_emergency = p.m[1].emergency;
+            body.m3_spending = p.m[2].spent;
+            body.m3_emergency = p.m[2].emergency;
+            body.consent = true;
+          }
+          return body;
+        }
+
+        // When the server refuses data it replies with status 422 and a list called "detail". Turn the first item into a sentence.
+        function explain(body) {
+          if (body && Array.isArray(body.detail) && body.detail.length) {
+            var d = body.detail[0];
+            var field = d.loc && d.loc.length ? d.loc[d.loc.length - 1] : "";
+            return (
+              "Check " +
+              String(field).replace(/_/g, " ") +
+              ": " +
+              String(d.msg || "").replace(/^Value error, /, "")
+            );
+          }
+          return body && body.detail
+            ? String(body.detail)
+            : "Something went wrong on the server.";
+        }
+
+        function post(path, payload) {
+          return fetch(API + path, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }).then(function (r) {
+            return r
+              .json()
+              .catch(function () {
+                return {};
+              })
+              .then(function (body) {
+                if (!r.ok) {
+                  var err = new Error(explain(body));
+                  err.status = r.status;
+                  throw err;
+                }
+                return body;
+              });
+          });
+        }
+
+        /* ---------- the receipt ---------- */
+        function naira(n) {
+          return "₦" + fmt(n);
+        }
+        function roundTo(n, step) {
+          return Math.round(n / step) * step;
+        }
+
+        function show(p, res) {
+          $("r-estimate").textContent = naira(roundTo(res.estimate, 500));
+          $("r-range").textContent =
+            "Likely between " +
+            naira(Math.max(0, roundTo(res.low, 1000))) +
+            " and " +
+            naira(roundTo(res.high, 1000)) +
+            ".";
+          $("r-code").textContent = p.code;
+          $("r-last").textContent = naira(p.m[0].spent);
+          $("r-mae").textContent =
+            "about " + naira(roundTo(res.typical_miss, 100));
+
+          var outside =
+            p.age > 65 || p.income > 820000 || p.m[0].spent > 600000;
+          $("r-note").textContent = outside
+            ? "Some of your figures are higher than the model has seen, so this estimate is less reliable."
+            : "This model learned from practice data, so treat the number as a guide.";
+
+          var result = $("result");
+          var slip = result.querySelector(".slip");
+          slip.style.animation = "none";
+          void slip.offsetWidth;
+          slip.style.animation = ""; // replay the print animation
+          result.hidden = false;
+          var calm = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+          ).matches;
+          result.scrollIntoView({
+            behavior: calm ? "auto" : "smooth",
+            block: "start",
+          });
+        }
+
+        function setStatus(text, bad) {
+          var s = $("r-status");
+          s.textContent = text;
+          s.className = "status" + (bad ? " bad" : "");
+        }
+
+        /* ---------- progress counter ---------- */
+        function loadStats() {
+          fetch(API + "/stats")
+            .then(function (r) {
+              return r.ok ? r.json() : null;
+            })
+            .then(function (s) {
+              if (!s) return;
+              var el = $("progress");
+              el.textContent =
+                s.people + " of " + " people have filled this in so far.";
+              el.hidden = false;
+            })
+            .catch(function () {});
+        }
+        loadStats();
+
+        /* ---------- the button ---------- */
+        form.addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          clearErrors();
+          var p = read();
+          if (!p) return;
+
+          var btn = $("submit");
+          btn.disabled = true;
+          // First click: /submit (estimate + save). Later clicks: /predict (estimate only), so nobody is saved twice.
+          var request = saved
+            ? post("/predict", payloadOf(p, false))
+            : post("/submit", payloadOf(p, true));
+
+          request
+            .then(function (res) {
+              show(p, res);
+              if (saved) {
+                setStatus(
+                  "Your answers were already saved. Changes made after saving are not stored.",
+                  false,
+                );
+              } else {
+                saved = true;
+                setStatus("Saved under " + p.code + ".", false);
+                loadStats();
+              }
+            })
+            .catch(function (err) {
+              if (err.status) fail(err.message, null);
+              else
+                fail(
+                  "Could not reach the server. Check your connection and try again.",
+                  null,
+                );
+            })
+            .then(function () {
+              btn.disabled = false;
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>
