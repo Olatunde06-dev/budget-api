@@ -972,8 +972,7 @@
             .then(function (s) {
               if (!s) return;
               var el = $("progress");
-              el.textContent =
-                s.people + " of " + " people have filled this in so far.";
+              el.textContent = s.people + " people have filled this in so far.";
               el.hidden = false;
             })
             .catch(function () {});
